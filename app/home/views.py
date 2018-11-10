@@ -5,9 +5,7 @@
 from . import home
 from flask import render_template,redirect,url_for
 
-@home.route("/")
-def index():
-    return render_template("home/index.html")
+
 
 @home.route("/login/")
 def login():
@@ -40,3 +38,19 @@ def loginlog():
 @home.route("/moviecol/")
 def moviecol():
     return render_template("home/moviecol.html")
+
+@home.route("/")
+def index():
+    return render_template("home/index.html")
+
+@home.route("/animation/")
+def animation():
+    return render_template("home/animation.html")
+
+@home.route("/search/")
+def search():
+    return render_template("home/search.html")
+
+@home.route("/play/")
+def play():
+    return render_template("home/play.html")
