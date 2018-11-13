@@ -2,17 +2,7 @@
 # -*-coding:utf-8-*-
 # @Author  : E🚀M
 from datetime import datetime
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-import pymysql
-
-
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:root@127.0.0.1:3306/flaskmov"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
-
-db = SQLAlchemy(app)
-
+from app import db
 
 class User(db.Model):
     __tablename__ = "user"
@@ -203,21 +193,21 @@ class Oplog(db.Model):
     def __repr__(self):
         return "<Oplog %r>" % self.id
 
-if __name__ == "__main__":
-    # db.create_all()
-    # role = Role(
-    #     name = "超级管理员",
-    #     auths = ""
-    # )
-    # db.session.add(role)
-    # db.session.commit()
-    from werkzeug.security import generate_password_hash
-
-    admin = Admin(
-        name = "admin1",
-        pwd = generate_password_hash("eminjan521"),
-        is_super = 0,
-        role_id = 1
-    )
-    db.session.add(admin)
-    db.session.commit()
+# if __name__ == "__main__":
+#     # db.create_all()
+#     # role = Role(
+#     #     name = "超级管理员",
+#     #     auths = ""
+#     # )
+#     # db.session.add(role)
+#     # db.session.commit()
+#     from werkzeug.security import generate_password_hash
+#
+#     admin = Admin(
+#         name = "admin1",
+#         pwd = generate_password_hash("eminjan521"),
+#         is_super = 0,
+#         role_id = 1
+#     )
+#     db.session.add(admin)
+#     db.session.commit()
