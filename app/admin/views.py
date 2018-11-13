@@ -44,23 +44,19 @@ def login():
         data = form.data
         admin = Admin.query.filter_by(name=data["account"]).first()
         if not admin.check_pwd(data["pwd"]):
-            flash("密码错误！", "err")
+            flash("密码错误！")
             return redirect(url_for('admin.login'))
         session["admin"] = data["account"]
-        session["admin_id"] = admin.id
         return redirect(request.args.get("next") or url_for("admin.index"))
     return render_template("admin/login.html", form=form)
 
 
 @admin.route("/logout/")
-@admin_login_req
-# @admin_auth
 def logout():
     """
-    后台注销
+    后台注销登录
     """
     session.pop("admin", None)
-    session.pop("admin_id", None)
     return redirect(url_for("admin.login"))
 
 

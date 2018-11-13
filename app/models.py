@@ -1,6 +1,7 @@
 #!/usr/bin/env
 # -*-coding:utf-8-*-
 # @Author  : E🚀M
+from flask import Flask
 from datetime import datetime
 from app import db
 
@@ -194,13 +195,15 @@ class Oplog(db.Model):
         return "<Oplog %r>" % self.id
 
 # if __name__ == "__main__":
-#     # db.create_all()
-#     # role = Role(
-#     #     name = "超级管理员",
-#     #     auths = ""
-#     # )
-#     # db.session.add(role)
-#     # db.session.commit()
+#     db.create_all()
+#     role = Role(
+#         name = "超级管理员",
+#         auths = ""
+#     )
+#     db.session.add(role)
+#     db.session.commit()
+#
+#
 #     from werkzeug.security import generate_password_hash
 #
 #     admin = Admin(
