@@ -20,7 +20,7 @@ class LoginForm(FlaskForm):
         render_kw={
             "class":"form-control",
             "placeholder":"请输入账号!",
-            #"required":"required"
+            # "required":"required"
         }
     )
     pwd = PasswordField(
@@ -32,7 +32,7 @@ class LoginForm(FlaskForm):
         render_kw={
             "class": "form-control",
             "placeholder": "请输入密码!",
-            #"required": "required"
+            # "required": "required"
         }
 
     )
@@ -42,6 +42,7 @@ class LoginForm(FlaskForm):
         "class":"btn btn-primary btn-block btn-flat",
         }
     )
+
     def validate_account(self,field):
         account = field.data
         admin = Admin.query.filter_by(name = account).count()
@@ -62,7 +63,7 @@ class TagForm(FlaskForm):
         render_kw={
             "class":"form-control",
             "id":"input_name" ,
-            "placeholder":"请输入标签名称！"
+            "placeholder":"请输入标签名称！",
         }
     )
     submit = SubmitField(
