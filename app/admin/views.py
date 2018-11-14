@@ -1,12 +1,18 @@
 #!/usr/bin/env
 # -*-coding:utf-8-*-
 # @Author  : E🚀M
-from app import db
+import os
+
+import datetime
+import uuid
+
+from app import db,app
 from . import admin
 from flask import render_template, redirect, url_for, flash, session, request
-from app.admin.forms import LoginForm, TagForm
-from app.models import Admin, Tag
+from app.admin.forms import LoginForm, TagForm,MovieForm
+from app.models import Admin, Tag,Movie
 from functools import wraps
+from werkzeug.utils import secure_filename
 
 
 def admin_login_req(f):
@@ -21,6 +27,15 @@ def admin_login_req(f):
         return redirect(url_for("admin.login"))
 
     return decorated_function
+
+def change_filename(filename):
+    """
+    修改文件名称
+    :return:
+    """
+    fileinfo = os.path.splitext(filename)
+    filename = datetime.datetime.now().strftime("%Y%m%d%H%M%S") + str(uuid.uuid4().hex) + fileinfo[-1]
+    return filename
 
 
 @admin.route("/")
@@ -139,17 +154,57 @@ def tag_del(id=None):
     return redirect(url_for("admin.tag_list", page=1))
 
 
-@admin.route("/movie/add/")
+@admin.route("/movie/add/", methods=["GET", "POST"])
 @admin_login_req
 def movie_add():
-    return render_template("admin/movie_add.html")
+    """
+    添加电影页面
+    """
+    form = MovieForm()
+    if form.validate_on_submit():
+        data = form.data
+        file_url = secure_filename(form.url.data.filename)
+        file_logo = secure_filename(form.logo.data.filename)
+        if not os.path.exists(app.config["UP_DIR"]):
+            os.makedirs(app.config["UP_DIR"])
+            os.chmod(app.config["UP_DIR"], "rw")
+        url = change_filename(file_url)
+        logo = change_filename(file_logo)
+        form.url.data.save(app.config["UP_DIR"] + url)
+        form.logo.data.save(app.config["UP_DIR"] + logo)
+        movie = Movie(
+            title=data["title"],
+            url=url,
+            info=data["info"],
+            logo=logo,
+            star=int(data["star"]),
+            playnum=0,
+            commentnum=0,
+            tag_id=int(data["tag_id"]),
+            area=data["area"],
+            release_time=data["release_time"],
+            length=data["length"]
+        )
+        db.session.add(movie)
+        db.session.commit()
+        flash("电影添加成功！", "ok")
+        return redirect(url_for('admin.movie_add'))
+    return render_template("admin/movie_add.html", form=form)
 
-
-@admin.route("/movie/list/")
+@admin.route("/movie/list/<int:page>/", methods=["GET"])
 @admin_login_req
-def movie_list():
-    return render_template("admin/movie_list.html")
-
+def movie_list(page=None):
+    """
+    电影列表页面
+    """
+    if page is None:
+        page = 1
+    page_data = Movie.query.join(Tag).filter(
+        Tag.id == Movie.tag_id
+    ).order_by(
+        Movie.addtime.desc()
+    ).paginate(page=page, per_page=10)
+    return render_template("admin/movie_list.html", page_data=page_data)
 
 @admin.route("/preview/add/")
 @admin_login_req

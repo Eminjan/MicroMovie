@@ -1,6 +1,7 @@
 #!/usr/bin/env
 # -*-coding:utf-8-*-
 # @Author  : E🚀M
+import os
 
 from flask import Flask
 from flask import render_template
@@ -12,6 +13,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+mysqlconnector://root:root@127.0.0.1:3306/movie?charset=utf8"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config["SECRET_KEY"] = 'f00cd2a8351943b4a52573fcbb3a4c97'
+app.config["UP_DIR"] = os.path.join(os.path.abspath(os.path.dirname(__file__)), "static/uploads/")
 app.debug = True
 db = SQLAlchemy(app)
 
