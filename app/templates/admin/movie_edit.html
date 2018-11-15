@@ -72,8 +72,8 @@
                                         <p style="color: red">{{ err }}</p>
                                     </div>
                                 {% endfor %}
-                                <img src="{{ url_for('static',filename='uploads/'+ movie.logo ) }}"
-                                     style="margin-top:5px;" class="img-responsive"
+                                <img src="{{ url_for('static',filename='uploads/'+ movie.logo ) }} "
+                                     style="margin-top:5px;width: 700px;height: 320px;" class="img-responsive"
                                      alt="">
                             </div>
                             <div class="form-group">
