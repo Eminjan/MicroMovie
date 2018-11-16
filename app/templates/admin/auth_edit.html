@@ -1,11 +1,24 @@
-{% extends "admin/admin.html" %}
+{% extends 'admin/admin.html' %}
+{% block css %}
+    <style>
+        * {
+            font-family: "Microsoft YaHei";
+        }
 
+        .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
+            vertical-align: middle;
+            text-align: center;
+        }
+
+    </style>
+{% endblock %}
 {% block content %}
+    <!--内容-->
     <section class="content-header">
         <h1>微电影管理系统</h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> 权限管理</a></li>
-            <li class="active">添加权限</li>
+            <li class="active">修改权限</li>
         </ol>
     </section>
     <section class="content" id="showcontent">
@@ -13,11 +26,11 @@
             <div class="col-md-12">
                 <div class="box box-primary">
                     <div class="box-header with-border">
-                        <h3 class="box-title">添加权限</h3>
+                        <h3 class="box-title">修改权限</h3>
                     </div>
                     <form role="form" method="post">
                         <div class="box-body">
-                        {% for msg in get_flashed_messages(category_filter=["ok"]) %}
+                            {% for msg in get_flashed_messages(category_filter=["ok"]) %}
                                 <div class="alert alert-success alert-dismissible">
                                     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×
                                     </button>
@@ -27,7 +40,7 @@
                             {% endfor %}
                             <div class="form-group">
                                 <label for="input_name">{{ form.name.label }}</label>
-                                {{ form.name }}
+                                {{ form.name(value=auth.name) }}
                                 {% for err in form.name.errors %}
                                     <div class="col-md-12">
                                         <p style="color: red">{{ err }}</p>
@@ -36,7 +49,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="input_url">{{ form.url.label }}</label>
-                                {{ form.url }}
+                                {{ form.url(value=auth.url) }}
                                 {% for err in form.url.errors %}
                                     <div class="col-md-12">
                                         <p style="color: red">{{ err }}</p>
@@ -58,8 +71,8 @@
 {% block js %}
     <script>
         $(document).ready(function () {
-            $("g-9").addClass("active");
-            $("g-9-1").addClass("active");
+            $("#g-9").addClass("active");
+            $("#g-9-1").addClass("active");
         });
     </script>
 {% endblock %}
