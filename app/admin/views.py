@@ -10,7 +10,7 @@ from app import db, app
 from . import admin
 from flask import render_template, redirect, url_for, flash, session, request
 from app.admin.forms import LoginForm, TagForm, MovieForm, PreviewForm
-from app.models import Admin, Tag, Movie, Preview
+from app.models import Admin, Tag, Movie, Preview, User, Comment
 from functools import wraps
 from werkzeug.utils import secure_filename
 
@@ -314,7 +314,7 @@ def preview_list(page=None):
         page = 1
     page_data = Preview.query.order_by(
         Preview.addtime.desc()
-    ).paginate(page=page, per_page=1)
+    ).paginate(page=page, per_page=10)
     return render_template("admin/preview_list.html", page_data=page_data)
 
 
@@ -340,9 +340,9 @@ def preview_edit(id):
     """
     form = PreviewForm()
     form.logo.validators = []
-    preview =Preview.query.get_or_404(int(id))
+    preview = Preview.query.get_or_404(int(id))
     if request.method == "GET":
-        form.title.data =preview.title
+        form.title.data = preview.title
     if form.validate_on_submit():
         data = form.data
         if form.logo.data != "":
@@ -353,26 +353,79 @@ def preview_edit(id):
         db.session.add(preview)
         db.session.commit()
         flash("修改预告成功！", "ok")
-        return redirect(url_for('admin.preview_edit',id = id))
-    return render_template("admin/preview_edit.html", form=form,preview = preview)
+        return redirect(url_for('admin.preview_edit', id=id))
+    return render_template("admin/preview_edit.html", form=form, preview=preview)
 
 
-@admin.route("/user/list/")
+@admin.route("/user/list/<int:page>/", methods=["GET"])
 @admin_login_req
-def user_list():
-    return render_template("admin/user_list.html")
+def user_list(page=None):
+    """
+    会员列表
+    :param page:
+    :return:
+    """
+    if page is None:
+        page = 1
+    page_data = User.query.order_by(
+        User.addtime.desc()
+    ).paginate(page=page, per_page=10)
+    return render_template("admin/user_list.html", page_data=page_data)
 
 
-@admin.route("/user/view/")
+@admin.route("/user/view/<int:id>", methods=["GET"])
 @admin_login_req
-def user_view():
-    return render_template("admin/user_view.html")
+def user_view(id=None):
+    user = User.query.get_or_404(int(id))
+    return render_template("admin/user_view.html", user=user)
 
 
-@admin.route("/comment/list/")
+@admin.route("/user/del/<int:id>/", methods=["GET"])
 @admin_login_req
-def comment_list():
-    return render_template("admin/comment_list.html")
+def user_del(id=None):
+    """
+    会员删除
+    """
+    user = User.query.get_or_404(int(id))
+    db.session.delete(user)
+    db.session.commit()
+    flash("删除会员成功！", "ok")
+    return redirect(url_for('admin.user_list', page=1))
+
+
+@admin.route("/comment/list/<int:page>/", methods=["GET"])
+@admin_login_req
+def comment_list(page=None):
+    """
+    评论列表
+    :return:
+    """
+    if page is None:
+        page = 1
+    page_data = Comment.query.join(
+        Movie
+    ).join(
+        User
+    ).filter(
+        Movie.id == Comment.movie_id,
+        User.id == Comment.user_id,
+    ).order_by(
+        Comment.addtime.desc()
+    ).paginate(page=page, per_page=10)
+    return render_template("admin/comment_list.html", page_data=page_data)
+
+
+@admin.route("/comment/del/<int:id>/", methods=["GET"])
+@admin_login_req
+def comment_del(id=None):
+    """
+    评论删除
+    """
+    comment = Comment.query.get_or_404(int(id))
+    db.session.delete(comment)
+    db.session.commit()
+    flash("删除评论成功！", "ok")
+    return redirect(url_for('admin.comment_list', page=1))
 
 
 @admin.route("/moviecol/list/")
