@@ -3,11 +3,13 @@
 # @Author  : E🚀M
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, FileField, TextAreaField,SelectField
-from wtforms.validators import DataRequired, ValidationError
-from app.models import Admin,Tag
+from wtforms import StringField, PasswordField, SubmitField, FileField, TextAreaField, SelectField, SelectMultipleField
+from wtforms.validators import DataRequired, ValidationError, EqualTo
+from app.models import Admin, Tag, Auth, Role
 
 tags = Tag.query.all()
+auth_list = Auth.query.all()
+role_list = Role.query.all()
 
 
 class LoginForm(FlaskForm):
@@ -121,10 +123,10 @@ class MovieForm(FlaskForm):
             DataRequired("请选择星级！")
         ],
         coerce=int,
-        choices=[(1,"1星"),(2,"2星"),(3,"3星"),(4,"4星"),(5,"5星")],
+        choices=[(1, "1星"), (2, "2星"), (3, "3星"), (4, "4星"), (5, "5星")],
         description="星级",
         render_kw={
-            "class":"form-control",
+            "class": "form-control",
         }
     )
     tag_id = SelectField(
@@ -133,7 +135,7 @@ class MovieForm(FlaskForm):
             DataRequired("请选择标签！")
         ],
         coerce=int,
-        choices=[(v.id,v.name) for v in tags],
+        choices=[(v.id, v.name) for v in tags],
         description="标签",
         render_kw={
             "class": "form-control",
@@ -261,7 +263,6 @@ class AuthForm(FlaskForm):
         description="权限名称",
         render_kw={
             "class": "form-control",
-            "id": "input_name",
             "placeholder": "请输入权限名称！",
         }
     )
@@ -274,14 +275,102 @@ class AuthForm(FlaskForm):
         description="权限地址",
         render_kw={
             "class": "form-control",
-            "id": "input_name",
             "placeholder": "请输入权限地址！",
         }
     )
 
     submit = SubmitField(
-        "添加",
+        "提交",
         render_kw={
             "class": "btn btn-primary",
+        }
+    )
+
+
+class RoleForm(FlaskForm):
+    name = StringField(
+        label="角色名称",
+        validators=[
+            DataRequired("角色名称不能为空！")
+        ],
+        description="角色名称",
+        render_kw={
+            "class": "form-control",
+            "placeholder": "请输入角色名称！"
+        }
+    )
+    auths = SelectMultipleField(
+        label="权限列表",
+        validators=[
+            DataRequired("权限列表不能为空！")
+        ],
+        # 动态数据填充选择栏：列表生成器
+        coerce=int,
+        choices=[(v.id, v.name) for v in auth_list],
+        description="权限列表",
+        render_kw={
+            "class": "form-control",
+        }
+    )
+    submit = SubmitField(
+        '提交',
+        render_kw={
+            "class": "btn btn-primary",
+        }
+    )
+
+
+class AdminForm(FlaskForm):
+    """
+    管理员添加
+    """
+    name = StringField(
+        label="管理员名称",
+        validators=[
+            DataRequired("请输入管理员名称!")
+        ],
+        description="管理员名称",
+        render_kw={
+            "class": "form-control",
+            "placeholder": "请输入管理员名称!",
+        }
+    )
+    pwd = PasswordField(
+        label="管理员密码",
+        validators=[
+            DataRequired("请输入管理员密码！")
+        ],
+        description="管理员密码",
+        render_kw={
+            "class": "form-control",
+            "placeholder": "请输入管理员密码!",
+        }
+
+    )
+    repwd = PasswordField(
+        label="管理员重复密码",
+        validators=[
+            DataRequired("请输入管理员重复密码！"),
+            EqualTo('pwd', message='两次密码不一致！')
+        ],
+        description="管理员重复密码",
+        render_kw={
+            "class": "form-control",
+            "placeholder": "请输入管理员重复密码!",
+        }
+
+    )
+    role_id = SelectField(
+        label="所属角色",
+        coerce=int,
+        choices=[(v.id, v.name) for v in role_list],
+        render_kw={
+            "class": "form-control",
+        }
+    )
+    submit = SubmitField(
+        "提交",
+        render_kw={
+            "class": "btn btn-primary btn-block btn-flat",
         }
     )
