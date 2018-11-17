@@ -32,9 +32,9 @@ def admin_login_req(f):
 
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if "admin" in session:
-            return f(*args, **kwargs)
-        return redirect(url_for("admin.login"))
+        if "admin" not in session:
+            return redirect(url_for("admin.login", next=request.url))
+        return f(*args, **kwargs)
 
     return decorated_function
 
