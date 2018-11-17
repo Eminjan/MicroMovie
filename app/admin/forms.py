@@ -306,7 +306,7 @@ class RoleForm(FlaskForm):
         ],
         # 动态数据填充选择栏：列表生成器
         coerce=int,
-        choices=[(v.id, v.name) for v in auth_list],
+        choices=[(v.id, v.name) for v in Auth.query.all()],
         description="权限列表",
         render_kw={
             "class": "form-control",

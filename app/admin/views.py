@@ -2,42 +2,15 @@
 # -*-coding:utf-8-*-
 # @Author  : E🚀M
 import os
-
-import datetime
 import uuid
-
+import datetime
 from app import db, app
-from . import admin
-from flask import render_template, redirect, url_for, flash, session, request,g,abort
-from app.admin.forms import LoginForm, TagForm, MovieForm, PreviewForm, PwdForm, AuthForm, RoleForm,AdminForm
-from app.models import Admin, Tag, Movie, Preview, User, Comment, Moviecol, Oplog, Adminlog, Userlog, Auth, Role
 from functools import wraps
+from . import admin
+from flask import render_template, redirect, url_for, flash, session, request, g, abort
+from app.admin.forms import LoginForm, TagForm, MovieForm, PreviewForm, PwdForm, AuthForm, RoleForm, AdminForm
+from app.models import Admin, Tag, Movie, Preview, User, Comment, Moviecol, Oplog, Adminlog, Userlog, Auth, Role
 from werkzeug.utils import secure_filename
-
-
-def admin_auth(f):
-    """
-    权限控制装饰器
-    """
-
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        admin = Admin.query.join(
-            Role
-        ).filter(
-            Role.id == Admin.role_id,
-            Admin.id == session["admin_id"]
-        ).first()
-        auths = admin.role.auths
-        auths = list(map(lambda v: int(v), auths.split(",")))
-        auth_list = Auth.query.all()
-        urls = [v.url for v in auth_list for val in auths if val == v.id]
-        rule = request.url_rule
-        if str(rule) not in urls:
-            abort(404)
-        return f(*args, **kwargs)
-
-    return decorated_function
 
 
 @admin.context_processor
@@ -78,6 +51,7 @@ def change_filename(filename):
 
 @admin.route("/")
 @admin_login_req
+# @admin_auth
 def index():
     """
     后台首页
@@ -143,6 +117,7 @@ def pwd():
 
 @admin.route("/tag/add/", methods=["GET", "POST"])
 @admin_login_req
+# @admin_auth
 def tag_add():
     """
     添加标签
@@ -173,6 +148,7 @@ def tag_add():
 
 @admin.route("/tag/edit/<int:id>/", methods=["GET", "POST"])
 @admin_login_req
+# @admin_auth
 def tag_edit(id):
     """
     编辑标签
@@ -197,6 +173,7 @@ def tag_edit(id):
 
 @admin.route("/tag/list/<int:page>/", methods=["GET"])
 @admin_login_req
+# @admin_auth
 def tag_list(page=None):
     """
     标签列表
@@ -212,6 +189,7 @@ def tag_list(page=None):
 
 @admin.route("/tag/del/<int:id>/", methods=["GET"])
 @admin_login_req
+# @admin_auth
 def tag_del(id=None):
     """
     标签的删除
@@ -741,9 +719,9 @@ def admin_add():
     return render_template("admin/admin_add.html", form=form)
 
 
-@admin.route("/admin/List/<int:page>/",methods = ["GET","POST"])
+@admin.route("/admin/List/<int:page>/", methods=["GET", "POST"])
 @admin_login_req
-def admin_list(page = None):
+def admin_list(page=None):
     """
     管理员列表
     :return:
@@ -756,5 +734,5 @@ def admin_list(page = None):
         Role.id == Admin.role_id
     ).order_by(
         Admin.addtime.desc()
-    ).paginate(page=page,per_page=10)
-    return render_template("admin/admin_list.html",page_data = page_data)
+    ).paginate(page=page, per_page=10)
+    return render_template("admin/admin_list.html", page_data=page_data)
