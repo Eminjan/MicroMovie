@@ -18,8 +18,7 @@ from . import home
 from flask import render_template, redirect, url_for
 from werkzeug.security import generate_password_hash
 
-from .forms import RegistForm, LoginForm, UserdetailForm
-
+from .forms import RegistForm, LoginForm, UserdetailForm, PwdForm
 
 
 def change_filename(filename):
@@ -30,7 +29,6 @@ def change_filename(filename):
     filename = datetime.datetime.now().strftime("%Y%m%d%H%M%S") + \
                str(uuid.uuid4().hex) + fileinfo[-1]
     return filename
-
 
 
 def user_login_req(f):
@@ -156,14 +154,26 @@ def user():
     return render_template("home/user.html", form=form, user=user)
 
 
-@home.route("/pwd/")
+@home.route("/pwd/", methods=["GET", "POST"])
 @user_login_req
 def pwd():
     """
     修改密码
     :return:
     """
-    return render_template("home/pwd.html")
+    form = PwdForm()
+    if form.validate_on_submit():
+        data = form.data
+        user = User.query.filter_by(name=session["user"]).first()
+        if not user.check_pwd(data["old_pwd"]):
+            flash("旧密码错误！", "err")
+            return redirect(url_for('home.pwd'))
+        user.pwd = generate_password_hash(data["new_pwd"])
+        db.session.add(user)
+        db.session.commit()
+        flash("修改密码成功，请重新登录！", "ok")
+        return redirect(url_for('home.logout'))
+    return render_template("home/pwd.html", form=form)
 
 
 @home.route("/comments/")
