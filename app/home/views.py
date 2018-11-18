@@ -13,7 +13,7 @@ from flask import session
 from werkzeug.utils import secure_filename
 
 from app import db, app
-from app.models import User, Userlog
+from app.models import User, Userlog,Preview
 from . import home
 from flask import render_template, redirect, url_for
 from werkzeug.security import generate_password_hash
@@ -220,7 +220,14 @@ def index():
 
 @home.route("/animation/")
 def animation():
-    return render_template("home/animation.html")
+    """
+    上映预告
+    :return:
+    """
+    data = Preview.query.all()
+    for v in data:
+        v.id = v.id - 1
+    return render_template("home/animation.html",data = data)
 
 
 @home.route("/search/")
