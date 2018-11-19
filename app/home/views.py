@@ -13,7 +13,7 @@ from flask import session
 from werkzeug.utils import secure_filename
 
 from app import db, app
-from app.models import User, Userlog,Preview
+from app.models import User, Userlog, Preview, Tag,Movie
 from . import home
 from flask import render_template, redirect, url_for
 from werkzeug.security import generate_password_hash
@@ -196,11 +196,11 @@ def loginlog(page=None):
     if page is None:
         page = 1
     page_data = Userlog.query.filter_by(
-        user_id = int(session["user_id"])
+        user_id=int(session["user_id"])
     ).order_by(
         Userlog.addtime.desc()
     ).paginate(page=page, per_page=10)
-    return render_template("home/loginlog.html",page_data = page_data)
+    return render_template("home/loginlog.html", page_data=page_data)
 
 
 @home.route("/moviecol/")
@@ -213,9 +213,70 @@ def moviecol():
     return render_template("home/moviecol.html")
 
 
+@home.route("/<int:page>/", methods=["GET"])
 @home.route("/")
-def index():
-    return render_template("home/index.html")
+def index(page=None):
+    """
+    首页
+    :return:
+    """
+    tags = Tag.query.all()
+    page_data = Movie.query
+
+    tid = request.args.get("tid", 0)
+    if int(tid) != 0:
+        page_data = page_data.filter_by(tag_id=int(tid))
+
+    star = request.args.get("star", 0)
+    if int(star) != 0:
+        page_data = page_data.filter_by(star=int(star))
+
+    time = request.args.get("time", 0)
+    if int(time) != 0:
+        if int(time) == 1:
+            page_data = page_data.order_by(
+                Movie.addtime.desc()
+            )
+        else:
+            page_data = page_data.order_by(
+                Movie.addtime.asc()
+            )
+
+    pm = request.args.get("pm", 0)
+    if int(pm) != 0:
+        if int(pm) == 1:
+            page_data = page_data.order_by(
+                Movie.playnum.desc()
+            )
+        else:
+            page_data = page_data.order_by(
+                Movie.playnum.asc()
+            )
+    cm = request.args.get("cm", 0)
+    if int(cm) != 0:
+        if int(cm) == 1:
+            page_data = page_data.order_by(
+                Movie.commentnum.desc()
+            )
+        else:
+            page_data = page_data.order_by(
+                Movie.commentnum.asc()
+            )
+    if page is None:
+        page = 1
+    page_data = page_data.paginate(page=page, per_page=8)
+    p = dict(
+        tid=tid,
+        star=star,
+        time=time,
+        pm=pm,
+        cm=cm,
+    )
+    return render_template(
+        "home/index.html",
+        tags=tags,
+        p=p,
+        page_data=page_data)
 
 
 @home.route("/animation/")
@@ -227,7 +288,7 @@ def animation():
     data = Preview.query.all()
     for v in data:
         v.id = v.id - 1
-    return render_template("home/animation.html",data = data)
+    return render_template("home/animation.html", data=data)
 
 
 @home.route("/search/")
