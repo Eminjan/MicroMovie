@@ -13,7 +13,7 @@ from flask import session
 from werkzeug.utils import secure_filename
 
 from app import db, app
-from app.models import User, Userlog, Preview, Tag,Movie
+from app.models import User, Userlog, Preview, Tag, Movie
 from . import home
 from flask import render_template, redirect, url_for
 from werkzeug.security import generate_password_hash
@@ -222,7 +222,6 @@ def index(page=None):
     """
     tags = Tag.query.all()
     page_data = Movie.query
-
     tid = request.args.get("tid", 0)
     if int(tid) != 0:
         page_data = page_data.filter_by(tag_id=int(tid))
@@ -291,11 +290,35 @@ def animation():
     return render_template("home/animation.html", data=data)
 
 
-@home.route("/search/")
-def search():
-    return render_template("home/search.html")
+@home.route("/search/<int:page>/")
+def search(page=None):
+    """
+    搜索
+    :return:
+    """
+    if page is None:
+        page = 1
+    key = request.args.get("key", "")
+    movie_count = Movie.query.filter(
+        Movie.title.ilike('%' + key + '%')
+    ).count()
+    page_data = Movie.query.filter(
+        Movie.title.ilike('%' + key + '%')
+    ).order_by(
+        Movie.addtime.desc()
+    ).paginate(page=page, per_page=10)
+    page_data.key = key
+    return render_template("home/search.html", movie_count=movie_count, key=key, page_data=page_data)
 
 
-@home.route("/play/")
-def play():
-    return render_template("home/play.html")
+@home.route("/play/<int:id>/")
+def play(id=None):
+    """
+    电影播放
+    :return:
+    """
+    movie = Movie.query.join(Tag).filter(
+        Tag.id == Movie.tag_id,
+        Movie.id == int(id)
+    ).first_or_404()
+    return render_template("home/play.html", movie=movie)
