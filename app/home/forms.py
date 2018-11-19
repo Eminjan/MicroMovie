@@ -228,7 +228,6 @@ class PwdForm(FlaskForm):
     )
 
 
-
 class CommentForm(FlaskForm):
     content = TextAreaField(
         label="内容",
@@ -247,3 +246,4 @@ class CommentForm(FlaskForm):
             "id": "btn-sub"
         }
     )
+
