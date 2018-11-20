@@ -7,6 +7,6 @@
 ```
 $ mkdir FlaskMovie
 $ git clone https://github.com/Eminjan/flaskmovie.git
-$ pip install -r requirements.txt 
-$ python manage.py 
+$ pip install -r req.txt 
+$ python manage.py runserver
 ```
